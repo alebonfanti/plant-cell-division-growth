@@ -1,0 +1,125 @@
+
+
+//Stack to Maximum projection, save composite and individual channels
+
+//design 2 exclusive ROIs based on CW counterstaining (cell division zone and outside)
+
+//measure sequentially selected parameters on immunofluorescent channel
+
+Author: Dr Matthieu Bourdon (
+
+{
+
+dir=getDirectory("Choose directory");
+
+name=File.nameWithoutExtension;
+
+print(dir);
+
+AnalysisDir= dir+"/Analysis and splitted files/";
+
+print(AnalysisDir);
+
+File.makeDirectory(AnalysisDir);
+
+path = AnalysisDir+name;
+
+run("Z Project...", "projection=[Max Intensity]");
+
+saveAs("Tiff", path+"_MAX_Tiff");
+
+run("Make Composite");
+
+saveAs("Jpeg", path+"_MAX_Composite");
+
+imageTitle=getTitle();
+
+run("Split Channels");
+
+selectWindow("C1-"+imageTitle);
+
+saveAs("Jpeg", path+"_MAX_Calcofluor");
+
+//this threshold can be adjusted for a full image set
+
+setThreshold(3, 255);
+
+setTool("polygon");
+
+waitForUser("Select regions to be analyzed \n Drawing inside current selection while pressing Alt creates a hole removing content from the ROI,\n Drawing outside current selection while pressing Shift creates new content")
+
+run("Make Inverse");
+
+run("Clear", "stack");
+
+run("Duplicate...", "ignore");
+
+setThreshold(3, 255);
+
+//this treshold can be adjusted to your requirements
+
+setTool("polygon");
+
+waitForUser("Draw manually new cells ROI. \n Drawing inside current selection while pressing Alt creates a hole removing content from the ROI,\n Drawing outside current selection while pressing Shift creates new content")
+
+roiManager("Add");
+
+run("Clear Outside", "stack");
+
+run("Create Selection");
+
+run("Make Binary", "method=Li background=Dark calculate only black");
+
+run("Create Selection");
+
+roiManager("Add");
+
+saveAs("Selection", path+"_ROI_inside");
+
+selectWindow("C1-"+imageTitle);
+
+setThreshold(2, 255);
+
+roiManager("Select", 0);
+
+run("Clear", "stack");
+
+run("Make Inverse");
+
+run("Make Binary", "method=Li background=Dark calculate only black");
+
+run("Create Selection");
+
+roiManager("Add");
+
+saveAs("Selection", path+"_ROI_outside");
+
+selectWindow("C2-"+imageTitle);
+
+saveAs("Jpeg", path+"_MAX_Callose");
+
+roiManager("Select", 1);
+
+waitForUser("Check that ROI_inside matches well the area to be measured");
+
+run("Set Measurements...", "area mean standard min display redirect=None decimal=2");
+
+run("Measure");
+
+roiManager("Select", 2);
+
+waitForUser("Check that ROI_inside matches well the area to be measured");
+
+run("Set Measurements...", "area mean standard min display redirect=None decimal=2");
+
+run("Measure");
+
+roiManager("Delete");
+
+roiManager("Delete");
+
+roiManager("Delete");
+
+run("Close All");
+
+}

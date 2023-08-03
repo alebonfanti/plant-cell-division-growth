@@ -624,5 +624,3 @@ plotstrain(edge_cell_connections_24, data_points_24, strain, 40,115)
 # show(stdout,"text/plain", YMratio[findall(x -> x<0.85, YMratio[:,3]),:])
 
 print("\n", "End")
-
-

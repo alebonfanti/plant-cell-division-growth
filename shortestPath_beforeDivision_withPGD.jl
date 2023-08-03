@@ -357,7 +357,7 @@ function order_walls(topo,vertices)
 end
 
 
-function shortest_path(label_mother, topo,vertices, cells, topoE, verticesE, cellsE, parents, sourceFib, sourcePGD, sourceLabelsPGD, sourceFibPGD)
+function shortest_path(label_mother, topo,vertices, cells, topoE, verticesE, cellsE, parents, sourceFib, sourcePGD, sourceLabelsPGD, sourceFibPGD, sourceLabelsFib)
 
 
     (fig, ax) = subplots(1, 1, figsize=(7,5))
@@ -427,13 +427,14 @@ function shortest_path(label_mother, topo,vertices, cells, topoE, verticesE, cel
 
     # # Calculate fibril orientation
     fibril_vect = compute_angle_v02(label_mother,sourceFib, cx, cy, B, fig, ax, "red")
+    #fibril_vect = compute_angle(label_mother,sourceFib, sourceLabelsFib, cx, cy, B, fig, ax, "red")
     m_fibril = (fibril_vect[3,2] - fibril_vect[1,2]) / (fibril_vect[3,1] - fibril_vect[1,1]);
 
 
     # Calculate PGD orientation
-    #PGD_vect = compute_angle(label_mother,sourcePGD, sourceLabelsPGD, cx, cy, B, fig, ax, "green")
-    #m_PGD = (PGD_vect[3,2] - PGD_vect[1,2]) / (PGD_vect[3,1] - PGD_vect[1,1]);
-    m_PGD = 10;
+    PGD_vect = compute_angle(label_mother,sourcePGD, sourceLabelsPGD, cx, cy, B, fig, ax, "green")
+    m_PGD = (PGD_vect[3,2] - PGD_vect[1,2]) / (PGD_vect[3,1] - PGD_vect[1,1]);
+    #m_PGD = 10;
  
     # Find tangent to new wall from configuration t+dt
     size_topo_new = round(Int64,size(topo_new,1)/2);
@@ -558,7 +559,7 @@ function shortest_path(label_mother, topo,vertices, cells, topoE, verticesE, cel
     stored_length = unique(stored_length,dims = 1)
 
     print("Shortest = ", stored_length[1,7], "\n")
-    shortest = stored_length[1,7] *1.02;
+    shortest = stored_length[1,7] *1.02;    # Change HERE FOR THRESHOLD!
     plot_short = true
     k = 1
     short_stored = Array{Float64}(undef,0,8)
@@ -604,10 +605,10 @@ function shortest_path(label_mother, topo,vertices, cells, topoE, verticesE, cel
     # theta_longest = rad2deg.(atan.(abs.((m_new.-long_tangent)./(1 .+ long_tangent.*m_new))));
 
     theta_fibril = rad2deg.(atan.(abs.((m_new.-m_fibril)./(1 .+ m_fibril.*m_new))));
-    #theta_PGD = rad2deg.(atan.(abs.((m_new.-m_PGD)./(1 .+ m_PGD.*m_new))));
-    #theta_FibPGD = rad2deg.(atan.(abs.((m_fibril.-m_PGD)./(1 .+ m_PGD.*m_fibril))));
-    theta_PGD = 100
-    theta_FibPGD = 100
+    theta_PGD = rad2deg.(atan.(abs.((m_new.-m_PGD)./(1 .+ m_PGD.*m_new))));
+    theta_FibPGD = rad2deg.(atan.(abs.((m_fibril.-m_PGD)./(1 .+ m_PGD.*m_fibril))));
+    #theta_PGD = 100
+    #theta_FibPGD = 100
 
     #warning = check_angles(label_mother,theta_FibPGD, sourceFibPGD)
     warning = true
@@ -1105,8 +1106,7 @@ function compute_angle(n3,source, sourceLabels, cx, cy, B, fig, ax, color)
     if size(findcell,1) == 0
         alpha = 180 - alpha;
     end
-        
-    
+          
     fib_dir = [ 2*cos(deg2rad(alpha))  2*sin(deg2rad(alpha)) 0
                     0 0 0 
                 -2*cos(deg2rad(alpha)) -2*sin(deg2rad(alpha)) 0];
@@ -1245,17 +1245,19 @@ end
 
 function mainDividing()
 
-        fileT = ".\\leaf\\analysis\\P5-S5\\P5_S5_24h_parents_12h_MT_output.txt";
-        fileTdt = ".\\leaf\\analysis\\P5-S5\\P5_S5_36h_parents_24h_MT_output.txt";
-        parents = ".\\leaf\\analysis\\P5-S5\\P5_S5_36h_24h_parents.csv"
-        sourceFib = ".\\leaf\\analysis\\P5-S5\\P5_S5_24h_fibrilAngles.csv"
-        PGD = ".\\leaf\\analysis\\P5-S5\\P5_S5_24h_AnglesPGD.csv"
-        labelsPGD = ".\\leaf\\analysis\\P5-S5\\P5_S5_24h_labelsPGD.csv"
-        sourceFibPGD = ".\\leaf\\analysis\\P5-S5\\P5_S5_24h_AnglesDiffFibPGD.csv"
-        labels = readdlm(".\\leaf\\analysis\\P5-S5\\P5_S5_24h_36h_labels.csv", ',', header = true)[1]
-        outputfile = ".\\leaf\\analysis\\P5-S5\\P5_S5_24h_36h_analysisNew.csv"
-        sample_number = 1;
-        sample_flag = 1; 
+    fileT = "./analysis/sample05/2021_05_27_mSgT_MT_timecourse_sample02_36h_MT_output.txt";
+    fileTdt = "./analysis/sample05/2021_05_27_mSgT_MT_timecourse_sample02_48h_MT_output.txt";
+    parents = "./analysis/sample05/sample05_48h_parents.csv"
+    sourceFib = "./analysis/sample05/sample05_36h_fibrilAngles.csv"
+    labelsFib ="./analysis/sample05/sample05_36h_labelsFibrils.csv"
+    PGD = "./analysis/sample05/sample05_36h_AnglesPGD.csv"
+    labelsPGD = "./analysis/sample05/sample05_36h_labelsPGD.csv"
+    sourceFibPGD = "./analysis/sample05/sample05_36h_AnglesDiffFibPGD.csv"
+    labels = readdlm("./analysis/sample05/sample05_36h_labels.csv", ',', header = true)[1]
+    outputfile = "./analysis/sample05/sample05_36h_analysis_New.csv"
+    sample_number = 1;
+    sample_flag = 1; 
+
 
     save_results = Array{Float64}(undef,0,10);
 
@@ -1265,7 +1267,7 @@ function mainDividing()
         print("Mother cell label = ", labels[z], "\n")
         topo, vertices, cells = read_init(fileT)
         topoE, verticesE, cellsE = read_init(fileTdt)
-        stored_length, short_stored, theta_fibril, theta_PGD, theta_FibPGD, warning, saveLine = shortest_path(labels[z], topo,vertices, cells, topoE, verticesE, cellsE, parents,sourceFib, PGD, labelsPGD, sourceFibPGD)
+        stored_length, short_stored, theta_fibril, theta_PGD, theta_FibPGD, warning, saveLine = shortest_path(labels[z], topo,vertices, cells, topoE, verticesE, cellsE, parents,sourceFib, PGD, labelsPGD, sourceFibPGD, labelsFib)
 
         print("Fibril angle = ", theta_fibril, "\n")
         print("PGD angle = ", theta_PGD, "\n")
@@ -1288,7 +1290,7 @@ function mainAll()
 
     
 
-    fileT = ".\\leaf\\analysis\\P4-S3\\P4_S3_48h_parents_36h_MT_output.txt";
+    fileT = "./leaf\\analysis\\P4-S3\\P4_S3_48h_parents_36h_MT_output.txt";
     sourceFib = ".\\leaf\\analysis\\P4-S3\\P4_S3_48h_fibrilsNew.csv"
     labelsFib =".\\leaf\\analysis\\P4-S3\\P4_S3_48h_labelsFibrils.csv"
     PGD = ".\\leaf\\analysis\\P4-S3\\P4_S3_48h_AnglesPGD.csv"
@@ -1338,113 +1340,118 @@ mainDividing()
 
 #--------------------- MARCHANTIA --------------------------------------------------------
 
-# fileT = ".\\analysis\\sample01\\2021_03_17_mSgT_sample01_36h_MT_output.txt";
-# fileTdt = ".\\analysis\\sample01\\2021_03_17_mSgT_sample01_48h_output.txt";
-# parents = ".\\analysis\\sample01\\sample01_48h_parents.csv"
-# sourceFib = ".\\analysis\\sample01\\sample01_36h_fibrilAnglesNew.csv"
-# labelsFib =".\\analysis\\sample01\\sample01_36h_labelsFibrils.csv"
-# PGD = ".\\analysis\\sample01\\sample01_36h_AnglesPGD.csv"
-# labelsPGD = ".\\analysis\\sample01\\sample01_36h_labelsPGD.csv"
-# sourceFibPGD = ".\\analysis\\sample01\\sample01_36h_AnglesDiffFibPGD.csv"
-# labels = readdlm(".\\analysis\\sample01\\sample01_36h_labels.csv", ',', header = true)[1]
-# outputfile = ".\\analysis\\sample01\\sample01_36h_analysisNew.csv"
-# sample_number = 1;
-# sample_flag = 1; 
-
-# fileT = ".\\analysis\\sample02\\2021_03_17_mSgT_sample02_36h_output.txt";
-# fileTdt = ".\\analysis\\sample02\\2021_03_17_mSgT_sample02_48h_output.txt";
-# parents = ".\\analysis\\sample02\\sample02_48h_parents.csv"
-# sourceFib = ".\\analysis\\sample02\\sample02_36h_fibrilAnglesNew.csv"
-# labelsFib =".\\analysis\\sample02\\sample02_36h_labelsFibrils.csv"
-# PGD = ".\\analysis\\sample02\\sample02_36h_AnglesPGD.csv"
-# labelsPGD = ".\\analysis\\sample02\\sample02_36h_labelsPGD.csv"
-# sourceFibPGD = ".\\analysis\\sample02\\sample02_36h_AnglesDiffFibPGD.csv"
-# labels = readdlm(".\\analysis\\sample02\\sample02_36h_labels.csv", ',', header = true)[1]
-# outputfile = ".\\analysis\\sample02\\sample02_36h_analysisNew.csv"
-# sample_number = 1;
-# sample_flag = 1; 
-
-# fileT = ".\\analysis\\sample03\\2021_03_17_mSgT_sample03_24h_MT_output.txt";
-# fileTdt = ".\\analysis\\sample03\\2021_03_17_mSgT_sample03_36h_output.txt";
-# parents = ".\\analysis\\sample03\\sample03_36h_parents.csv"
-# sourceFib = ".\\analysis\\sample03\\sample03_24h_fibrilAnglesNew.csv"
-# labelsFib =".\\analysis\\sample03\\sample03_24h_labelsFibrils.csv"
-# PGD = ".\\analysis\\sample03\\sample03_24h_AnglesPGD.csv"
-# labelsPGD = ".\\analysis\\sample03\\sample03_24h_labelsPGD.csv"
-# sourceFibPGD = ".\\analysis\\sample03\\sample03_24h_AnglesDiffFibPGD.csv"
-# labels = readdlm(".\\analysis\\sample03\\sample03_24h_labels.csv", ',', header = true)[1]
-# outputfile = ".\\analysis\\sample03\\sample03_24h_analysisNew.csv"
+# fileT = "./analysis/sample01/2021_03_17_mSgT_sample01_36h_MT_output.txt";
+# fileTdt = "./analysis/sample01/2021_03_17_mSgT_sample01_48h_output.txt";
+# parents = "./analysis/sample01/sample01_48h_parents.csv"
+# sourceFib = "./analysis/sample01/sample01_36h_fibrilAngles.csv"
+# labelsFib ="./analysis/sample01/sample01_36h_labelsFibrils.csv"
+# PGD = "./analysis/sample01/sample01_36h_AnglesPGD.csv"
+# labelsPGD = "./analysis/sample01/sample01_36h_labelsPGD.csv"
+# sourceFibPGD = "./analysis/sample01/sample01_36h_AnglesDiffFibPGD.csv"
+# labels = readdlm("./analysis/sample01/sample01_36h_labels.csv", ',', header = true)[1]
+# outputfile = "./analysis/sample01/sample01_36h_analysis_102.csv"
 # sample_number = 1;
 # sample_flag = 1; 
 
 
-# fileT = ".\\analysis\\sample03\\2021_03_17_mSgT_sample03_36h_output.txt";
-# fileTdt = ".\\analysis\\sample03\\2021_03_17_mSgT_sample03_48h_output.txt";
-# parents = ".\\analysis\\sample03\\sample03_48h_parents.csv"
-# sourceFib = ".\\analysis\\sample03\\sample03_36h_fibrilAnglesNew.csv"
-# labelsFib =".\\analysis\\sample03\\sample03_36h_labelsFibrils.csv"
-# PGD = ".\\analysis\\sample03\\sample03_36h_AnglesPGD.csv"
-# labelsPGD = ".\\analysis\\sample03\\sample03_36h_labelsPGD.csv"
-# sourceFibPGD = ".\\analysis\\sample03\\sample03_36h_AnglesDiffFibPGD.csv"
-# labels = readdlm(".\\analysis\\sample03\\sample03_36h_labels.csv", ',', header = true)[1]
-# outputfile = ".\\analysis\\sample03\\sample03_36h_analysisNew.csv"
+# fileT = "./analysis/sample02/2021_03_17_mSgT_sample02_36h_output.txt";
+# fileTdt = "./analysis/sample02/2021_03_17_mSgT_sample02_48h_output.txt";
+# parents = "./analysis/sample02/sample02_48h_parents.csv"
+# sourceFib = "./analysis/sample02/sample02_36h_fibrilAngles.csv"
+# labelsFib ="./analysis/sample02/sample02_36h_labelsFibrils.csv"
+# PGD = "./analysis/sample02/sample02_36h_AnglesPGD.csv"
+# labelsPGD = "./analysis/sample02/sample02_36h_labelsPGD.csv"
+# sourceFibPGD = "./analysis/sample02/sample02_36h_AnglesDiffFibPGD.csv"
+# labels = readdlm("./analysis/sample02/sample02_36h_labels.csv", ',', header = true)[1]
+# outputfile = "./analysis/sample02/sample02_36h_analysis_102.csv"
 # sample_number = 1;
-# sample_flag = 1; 
+# sample_flag = 1;
 
 
-# fileT = ".\\analysis\\sample04\\2021_03_17_mSgT_sample04_24h_MT_output.txt";
-# fileTdt = ".\\analysis\\sample04\\2021_03_17_mSgT_sample04_36h_MT_output.txt";
-# parents = ".\\analysis\\sample04\\sample04_36h_parents.csv"
-# sourceFib = ".\\analysis\\sample04\\sample04_24h_fibrilAnglesNew.csv"
-# labelsFib =".\\analysis\\sample04\\sample04_24h_labelsFibrils.csv"
-# PGD = ".\\analysis\\sample04\\sample04_24h_AnglesPGD.csv"
-# labelsPGD = ".\\analysis\\sample04\\sample04_24h_labelsPGD.csv"
-# sourceFibPGD = ".\\analysis\\sample04\\sample04_24h_AnglesDiffFibPGD.csv"
-# labels = readdlm(".\\analysis\\sample04\\sample04_24h_labels.csv", ',', header = true)[1]
-# outputfile = ".\\analysis\\sample04\\sample04_24h_analysisNew.csv"
+
+# fileT = "./analysis/sample03/2021_03_17_mSgT_sample03_24h_MT_output.txt";
+# fileTdt = "./analysis/sample03/2021_03_17_mSgT_sample03_36h_output.txt";
+# parents = "./analysis/sample03/sample03_36h_parents.csv"
+# sourceFib = "./analysis/sample03/sample03_24h_fibrilAngles.csv"
+# labelsFib ="./analysis/sample03/sample03_24h_labelsFibrils.csv"
+# PGD = "./analysis/sample03/sample03_24h_AnglesPGD.csv"
+# labelsPGD = "./analysis/sample03/sample03_24h_labelsPGD.csv"
+# sourceFibPGD = "./analysis/sample03/sample03_24h_AnglesDiffFibPGD.csv"
+# labels = readdlm("./analysis/sample03/sample03_24h_labels.csv", ',', header = true)[1]
+# outputfile = "./analysis/sample03/sample03_24h_analysis_100.csv"
 # sample_number = 1;
-# sample_flag = 1; 
+# sample_flag = 0;
 
 
-# fileT = ".\\analysis\\sample04\\2021_03_17_mSgT_sample04_36h_MT_output.txt";
-# fileTdt = ".\\analysis\\sample04\\2021_03_17_mSgT_sample04_48h_output.txt";
-# parents = ".\\analysis\\sample04\\sample04_48h_parents.csv"
-# sourceFib = ".\\analysis\\sample04\\sample04_36h_fibrilAnglesNew.csv"
-# labelsFib =".\\analysis\\sample04\\sample04_36h_labelsFibrils.csv"
-# PGD = ".\\analysis\\sample04\\sample04_36h_AnglesPGD.csv"
-# labelsPGD = ".\\analysis\\sample04\\sample04_36h_labelsPGD.csv"
-# sourceFibPGD = ".\\analysis\\sample04\\sample04_36h_AnglesDiffFibPGD.csv"
-# labels = readdlm(".\\analysis\\sample04\\sample04_36h_labels.csv", ',', header = true)[1]
-# outputfile = ".\\analysis\\sample04\\sample04_36h_analysisNew.csv"
+
+# fileT = "./analysis/sample03/2021_03_17_mSgT_sample03_36h_output.txt";
+# fileTdt = "./analysis/sample03/2021_03_17_mSgT_sample03_48h_output.txt";
+# parents = "./analysis/sample03/sample03_48h_parents.csv"
+# sourceFib = "./analysis/sample03/sample03_36h_fibrilAngles.csv"
+# labelsFib ="./analysis/sample03/sample03_36h_labelsFibrils.csv"
+# PGD = "./analysis/sample03/sample03_36h_AnglesPGD.csv"
+# labelsPGD = "./analysis/sample03/sample03_36h_labelsPGD.csv"
+# sourceFibPGD = "./analysis/sample03/sample03_36h_AnglesDiffFibPGD.csv"
+# labels = readdlm("./analysis/sample03/sample03_36h_labels.csv", ',', header = true)[1]
+# outputfile = "./analysis/sample03/sample03_36h_analysis_100.csv"
 # sample_number = 1;
 # sample_flag = 1; 
 
 
 
-# fileT = ".\\analysis\\sample05\\2021_05_27_mSgT_MT_timecourse_sample02_24h_MT_output.txt";
-# fileTdt = ".\\analysis\\sample05\\2021_05_27_mSgT_MT_timecourse_sample02_36h_MT_output.txt";
-# parents = ".\\analysis\\sample05\\sample05_36h_parents.csv"
-# sourceFib = ".\\analysis\\sample05\\sample05_24h_fibrilAnglesNew.csv"
-# labelsFib =".\\analysis\\sample05\\sample05_24h_labelsFibrils.csv"
-# PGD = ".\\analysis\\sample05\\sample05_24h_AnglesPGD.csv"
-# labelsPGD = ".\\analysis\\sample05\\sample05_24h_labelsPGD.csv"
-# sourceFibPGD = ".\\analysis\\sample05\\sample05_24h_AnglesDiffFibPGD.csv"
-# labels = readdlm(".\\analysis\\sample05\\sample05_24h_labels.csv", ',', header = true)[1]
-# outputfile = ".\\analysis\\sample05\\sample05_24h_analysisNew.csv"
+
+# fileT = "./analysis/sample04/2021_03_17_mSgT_sample04_24h_MT_output.txt";
+# fileTdt = "./analysis/sample04/2021_03_17_mSgT_sample04_36h_MT_output.txt";
+# parents = "./analysis/sample04/sample04_36h_parents.csv"
+# sourceFib = "./analysis/sample04/sample04_24h_fibrilAngles.csv"
+# labelsFib ="./analysis/sample04/sample04_24h_labelsFibrils.csv"
+# PGD = "./analysis/sample04/sample04_24h_AnglesPGD.csv"
+# labelsPGD = "./analysis/sample04/sample04_24h_labelsPGD.csv"
+# sourceFibPGD = "./analysis/sample04/sample04_24h_AnglesDiffFibPGD.csv"
+# labels = readdlm("./analysis/sample04/sample04_24h_labels.csv", ',', header = true)[1]
+# outputfile = "./analysis/sample04/sample04_24h_analysis_100.csv"
+# sample_number = 1;
+# sample_flag = 0; 
+
+# fileT = "./analysis/sample04/2021_03_17_mSgT_sample04_36h_MT_output.txt";
+# fileTdt = "./analysis/sample04/2021_03_17_mSgT_sample04_48h_output.txt";
+# parents = "./analysis/sample04/sample04_48h_parents.csv"
+# sourceFib = "./analysis/sample04/sample04_36h_fibrilAngles.csv"
+# labelsFib ="./analysis/sample04/sample04_36h_labelsFibrils.csv"
+# PGD = "./analysis/sample04/sample04_36h_AnglesPGD.csv"
+# labelsPGD = "./analysis/sample04/sample04_36h_labelsPGD.csv"
+# sourceFibPGD = "./analysis/sample04/sample04_36h_AnglesDiffFibPGD.csv"
+# labels = readdlm("./analysis/sample04/sample04_36h_labels.csv", ',', header = true)[1]
+# outputfile = "./analysis/sample04/sample04_36h_analysis_102.csv"
 # sample_number = 1;
 # sample_flag = 1; 
 
 
-# fileT = ".\\analysis\\sample05\\2021_05_27_mSgT_MT_timecourse_sample02_36h_MT_output.txt";
-# fileTdt = ".\\analysis\\sample05\\2021_05_27_mSgT_MT_timecourse_sample02_48h_MT_output.txt";
-# parents = ".\\analysis\\sample05\\sample05_48h_parents.csv"
-# sourceFib = ".\\analysis\\sample05\\sample05_36h_fibrilAnglesNew.csv"
-# labelsFib =".\\analysis\\sample05\\sample05_36h_labelsFibrils.csv"
-# PGD = ".\\analysis\\sample05\\sample05_36h_AnglesPGD.csv"
-# labelsPGD = ".\\analysis\\sample05\\sample05_36h_labelsPGD.csv"
-# sourceFibPGD = ".\\analysis\\sample05\\sample05_36h_AnglesDiffFibPGD.csv"
-# labels = readdlm(".\\analysis\\sample05\\sample05_36h_labels.csv", ',', header = true)[1]
-# outputfile = ".\\analysis\\sample05\\sample05_36h_analysisNew.csv"
+
+# fileT = "./analysis/sample05/2021_05_27_mSgT_MT_timecourse_sample02_24h_MT_output.txt";
+# fileTdt = "./analysis/sample05/2021_05_27_mSgT_MT_timecourse_sample02_36h_MT_output.txt";
+# parents = "./analysis/sample05/sample05_36h_parents.csv"
+# sourceFib = "./analysis/sample05/sample05_24h_fibrilAngles.csv"
+# labelsFib ="./analysis/sample05/sample05_24h_labelsFibrils.csv"
+# PGD = "./analysis/sample05/sample05_24h_AnglesPGD.csv"
+# labelsPGD = "./analysis/sample05/sample05_24h_labelsPGD.csv"
+# sourceFibPGD = "./analysis/sample05/sample05_24h_AnglesDiffFibPGD.csv"
+# labels = readdlm("./analysis/sample05/sample05_24h_labels.csv", ',', header = true)[1]
+# outputfile = "./analysis/sample05/sample05_24h_analysis_100.csv"
+# sample_number = 1;
+# sample_flag = 0; 
+
+
+# fileT = "./analysis/sample05/2021_05_27_mSgT_MT_timecourse_sample02_36h_MT_output.txt";
+# fileTdt = "./analysis/sample05/2021_05_27_mSgT_MT_timecourse_sample02_48h_MT_output.txt";
+# parents = "./analysis/sample05/sample05_48h_parents.csv"
+# sourceFib = "./analysis/sample05/sample05_36h_fibrilAngles.csv"
+# labelsFib ="./analysis/sample05/sample05_36h_labelsFibrils.csv"
+# PGD = "./analysis/sample05/sample05_36h_AnglesPGD.csv"
+# labelsPGD = "./analysis/sample05/sample05_36h_labelsPGD.csv"
+# sourceFibPGD = "./analysis/sample05/sample05_36h_AnglesDiffFibPGD.csv"
+# labels = readdlm("./analysis/sample05/sample05_36h_labels.csv", ',', header = true)[1]
+# outputfile = "./analysis/sample05/sample05_36h_analysis_100.csv"
 # sample_number = 1;
 # sample_flag = 1; 
 
